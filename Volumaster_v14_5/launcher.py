@@ -1,40 +1,42 @@
-import MetaTrader5 as mt5
-import json
 import os
-import datetime
+import json
+from MetaTrader5 import MetaTrader5 as mt5
 
-# Load configuration
-with open('vm14_5_config.json', 'r') as config_file:
-    config = json.load(config_file)
+# Load config
+config_path = os.path.join(os.path.dirname(__file__), 'vm14_5_config.json')
+with open(config_path) as config_file:
+    cfg = json.load(config_file)
 
-# Ensure runtime/events.jsonl
-os.makedirs('runtime', exist_ok=True)
+# Ensure runtime/events.jsonl exists
+if not os.path.exists('runtime/events.jsonl'):
+    os.makedirs('runtime', exist_ok=True)
 
-# Initialize MetaTrader 5
-if not mt5.initialize():
-    print("initialize() failed, error code =", mt5.last_error())
-    quit()
+# Read symbols from InputAsset.txt
+input_file_path = os.path.join(os.path.dirname(__file__), 'InputAsset.txt')
+with open(input_file_path) as input_file:
+    symbols = input_file.readlines()
 
-# Select the first configured symbol
-symbol = config['symbols'][0]
-if not mt5.symbol_select(symbol, True):
-    print(f"Symbol {symbol} not found, error code =", mt5.last_error())
-    mt5.shutdown()
-    quit()
+# Initialize MT5
+mt5.initialize()
 
-# Fetch a tick
-tick = mt5.symbol_info_tick(symbol)
-if tick is None:
-    print(f"Failed to get tick for {symbol}, error code =", mt5.last_error())
-    mt5.shutdown()
-    quit()
+for symbol in symbols:
+    symbol = symbol.strip()
+    # Select the trading symbol
+    if mt5.symbol_select(symbol):
+        # Retrieve ticks
+ticks = mt5.copy_ticks_from(symbol, dt.datetime.now(), 10, mt5.COPY_TICKS_ALL)
+        # Append JSONL event
+        with open('runtime/events.jsonl', 'a') as jsonl_file:
+            for tick in ticks:
+                jsonl_file.write(json.dumps(tick) + '\n')
+        # Simulate BUY order
+        risk = cfg['risk']
+        buy_volume = 0.01
+        # Safe dry-run market order simulation
+        # (Include risk guardrails accordingly)
+        print(f'Simulating BUY {buy_volume} lots for {symbol} with risk: {risk}')
+    else:
+        print(f'Symbol {symbol} not available')
 
-# Prepare events
-startup_event = {"event": "startup", "timestamp": "{}".format(datetime.datetime.utcnow())}
-with open('runtime/events.jsonl', 'a') as events_file:
-    events_file.write(json.dumps(startup_event) + '\n')
-    tick_event = {"event": "tick", "symbol": symbol, "bid": tick.bid, "ask": tick.ask, "timestamp": "{}".format(datetime.datetime.utcnow())}
-    events_file.write(json.dumps(tick_event) + '\n')
-
-# Shutdown MetaTrader 5
+# Shutdown MT5
 mt5.shutdown()
