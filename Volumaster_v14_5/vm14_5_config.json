@@ -1,0 +1,23 @@
+{
+  "version": "14.5.0",
+  "runtime_dir": "runtime",
+  "events_path": "runtime/events.jsonl",
+  "loop_sleep_s": 2,
+  "symbols": ["XAUUSD"],
+  "mt5": {
+    "path": "",
+    "deviation": 20,
+    "magic": 145001,
+    "comment": "VM14.5"
+  },
+  "risk": {
+    "enabled": true,
+    "dry_run": true,
+    "max_open_positions": 1,
+    "max_orders_per_minute": 2,
+    "max_volume_per_trade": 0.01,
+    "allowed_symbols": ["XAUUSD"],
+    "allowed_order_types": ["BUY", "SELL"],
+    "max_deviation": 30
+  }
+}
