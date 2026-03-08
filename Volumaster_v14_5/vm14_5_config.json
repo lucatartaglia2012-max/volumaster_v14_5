@@ -16,7 +16,7 @@
     "max_open_positions": 1,
     "max_orders_per_minute": 2,
     "max_volume_per_trade": 0.01,
-    "allowed_symbols": ["XAUUSD"],
+    "allowed_symbols": ["BTCUSD","ETHUSD","LTCUSD","BCHUSD","XRPUSD","EOSUSD","NEOUSD","XLMUSD"],
     "allowed_order_types": ["BUY", "SELL"],
     "max_deviation": 30
   }
